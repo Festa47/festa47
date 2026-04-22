@@ -50,6 +50,7 @@ export default function Page() {
         description: "",
       });
       loadVendors();
+       alert("Vendor added!");
     }
   }
 
