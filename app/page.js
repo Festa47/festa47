@@ -6,7 +6,6 @@ import { getSupabaseClient } from "../lib/supabase";
 export default function Page() {
   const [vendors, setVendors] = useState([]);
   const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
   const [form, setForm] = useState({
     name: "",
     category: "",
@@ -53,15 +52,9 @@ export default function Page() {
     }
   }
 
-  const categories = useMemo(() => {
-    const uniqueCategories = Array.from(
-      new Set(vendors.map((v) => String(v.category || "").trim()).filter(Boolean))
-    );
-    return ["All", ...uniqueCategories];
-  }, [vendors]);
-
   const filteredVendors = useMemo(() => {
     const q = search.trim().toLowerCase();
+    if (!q) return vendors;
 
     return vendors.filter((v) => {
       const name = String(v.name || "").toLowerCase();
@@ -69,19 +62,14 @@ export default function Page() {
       const location = String(v.location || "").toLowerCase();
       const description = String(v.description || "").toLowerCase();
 
-      const matchesSearch =
-        !q ||
+      return (
         name.includes(q) ||
         category.includes(q) ||
         location.includes(q) ||
-        description.includes(q);
-
-      const matchesCategory =
-        selectedCategory === "All" || String(v.category || "") === selectedCategory;
-
-      return matchesSearch && matchesCategory;
+        description.includes(q)
+      );
     });
-  }, [vendors, search, selectedCategory]);
+  }, [vendors, search]);
 
   return (
     <div
@@ -115,35 +103,6 @@ export default function Page() {
             onChange={(e) => setSearch(e.target.value)}
             style={inputStyle}
           />
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            gap: 8,
-            overflowX: "auto",
-            marginBottom: 16,
-            paddingBottom: 4,
-          }}
-        >
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              style={{
-                whiteSpace: "nowrap",
-                padding: "10px 14px",
-                borderRadius: 999,
-                border: selectedCategory === category ? "none" : "1px solid #e5e7eb",
-                background: selectedCategory === category ? "#111827" : "#ffffff",
-                color: selectedCategory === category ? "#ffffff" : "#374151",
-                fontWeight: "bold",
-                cursor: "pointer",
-              }}
-            >
-              {category}
-            </button>
-          ))}
         </div>
 
         <div
