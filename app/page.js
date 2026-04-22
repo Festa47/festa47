@@ -6,6 +6,7 @@ import { getSupabaseClient } from "../lib/supabase";
 export default function Page() {
   const [vendors, setVendors] = useState([]);
   const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [form, setForm] = useState({
     name: "",
     category: "",
@@ -61,7 +62,10 @@ export default function Page() {
       const category = String(v.category || "").toLowerCase();
       const location = String(v.location || "").toLowerCase();
       const description = String(v.description || "").toLowerCase();
-
+const categories = [
+  "All",
+  ...Array.from(new Set(vendors.map((v) => v.category))),
+];
       return (
         name.includes(q) ||
         category.includes(q) ||
@@ -104,7 +108,34 @@ export default function Page() {
             style={inputStyle}
           />
         </div>
-
+<div
+  style={{
+    display: "flex",
+    gap: 8,
+    overflowX: "auto",
+    marginBottom: 16,
+    paddingBottom: 4,
+  }}
+>
+  {categories.map((category) => (
+    <button
+      key={category}
+      onClick={() => setSelectedCategory(category)}
+      style={{
+        whiteSpace: "nowrap",
+        padding: "10px 14px",
+        borderRadius: 999,
+        border: selectedCategory === category ? "none" : "1px solid #e5e7eb",
+        background: selectedCategory === category ? "#111827" : "#ffffff",
+        color: selectedCategory === category ? "#ffffff" : "#374151",
+        fontWeight: "bold",
+        cursor: "pointer",
+      }}
+    >
+      {category}
+    </button>
+  ))}
+</div>
         <div
           style={{
             background: "#ffffff",
@@ -155,7 +186,10 @@ export default function Page() {
         {filteredVendors.length === 0 ? (
           <p>No matching vendors found.</p>
         ) : (
-          filteredVendors.map((v) => (
+          filteredVendors.filter((v) =>
+    selectedCategory === "All" ? true : v.category === selectedCategory
+  )
+  .map((v) => (
             <div
               key={v.id}
               style={{
