@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { getSupabaseClient } from "../lib/supabase";
 
 export default function Page() {
@@ -55,17 +55,23 @@ export default function Page() {
 
   const categories = [
     "All",
-    ...Array.from(new Set(vendors.map((v) => v.category))),
+    ...Array.from(new Set(vendors.map((v) => v.category).filter(Boolean))),
   ];
 
-  return (
-        name.includes(q) ||
-        category.includes(q) ||
-        location.includes(q) ||
-        description.includes(q)
-      );
-    });
-  }, [vendors, search]);
+  const filteredVendors = vendors.filter((v) => {
+    const matchesCategory =
+      selectedCategory === "All" || v.category === selectedCategory;
+
+    const q = search.toLowerCase();
+    const matchesSearch =
+      !q ||
+      (v.name || "").toLowerCase().includes(q) ||
+      (v.category || "").toLowerCase().includes(q) ||
+      (v.location || "").toLowerCase().includes(q) ||
+      (v.description || "").toLowerCase().includes(q);
+
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <div
@@ -100,34 +106,41 @@ export default function Page() {
             style={inputStyle}
           />
         </div>
-<div
-  style={{
-    display: "flex",
-    gap: 8,
-    overflowX: "auto",
-    marginBottom: 16,
-    paddingBottom: 4,
-  }}
->
-  {categories.map((category) => (
-    <button
-      key={category}
-      onClick={() => setSelectedCategory(category)}
-      style={{
-        whiteSpace: "nowrap",
-        padding: "10px 14px",
-        borderRadius: 999,
-        border: selectedCategory === category ? "none" : "1px solid #e5e7eb",
-        background: selectedCategory === category ? "#111827" : "#ffffff",
-        color: selectedCategory === category ? "#ffffff" : "#374151",
-        fontWeight: "bold",
-        cursor: "pointer",
-      }}
-    >
-      {category}
-    </button>
-  ))}
-</div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: 8,
+            overflowX: "auto",
+            marginBottom: 16,
+            paddingBottom: 4,
+          }}
+        >
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setSelectedCategory(category)}
+              style={{
+                whiteSpace: "nowrap",
+                padding: "10px 14px",
+                borderRadius: 999,
+                border:
+                  selectedCategory === category
+                    ? "none"
+                    : "1px solid #e5e7eb",
+                background:
+                  selectedCategory === category ? "#111827" : "#ffffff",
+                color:
+                  selectedCategory === category ? "#ffffff" : "#374151",
+                fontWeight: "bold",
+                cursor: "pointer",
+              }}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
         <div
           style={{
             background: "#ffffff",
@@ -166,7 +179,9 @@ export default function Page() {
           <input
             placeholder="Description"
             value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
+            onChange={(e) =>
+              setForm({ ...form, description: e.target.value })
+            }
             style={inputStyle}
           />
 
@@ -178,10 +193,7 @@ export default function Page() {
         {filteredVendors.length === 0 ? (
           <p>No matching vendors found.</p>
         ) : (
-          filteredVendors.filter((v) =>
-    selectedCategory === "All" ? true : v.category === selectedCategory
-  )
-  .map((v) => (
+          filteredVendors.map((v) => (
             <div
               key={v.id}
               style={{
@@ -193,12 +205,28 @@ export default function Page() {
                 border: "1px solid #f3d6e6",
               }}
             >
-              <h2 style={{ margin: "0 0 8px", color: "#111827" }}>{v.name}</h2>
-              <p style={{ margin: "0 0 8px", color: "#db2777", fontWeight: "bold" }}>
+              <h2 style={{ margin: "0 0 8px", color: "#111827" }}>
+                {v.name}
+              </h2>
+              <p
+                style={{
+                  margin: "0 0 8px",
+                  color: "#db2777",
+                  fontWeight: "bold",
+                }}
+              >
                 {v.category}
               </p>
-              <p style={{ margin: "0 0 8px", color: "#4b5563" }}>📍 {v.location}</p>
-              <p style={{ margin: "0 0 8px", color: "#111827", fontWeight: "bold" }}>
+              <p style={{ margin: "0 0 8px", color: "#4b5563" }}>
+                📍 {v.location}
+              </p>
+              <p
+                style={{
+                  margin: "0 0 8px",
+                  color: "#111827",
+                  fontWeight: "bold",
+                }}
+              >
                 ${v.price}
               </p>
               <p style={{ margin: 0, color: "#4b5563", lineHeight: 1.5 }}>
