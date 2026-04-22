@@ -233,6 +233,22 @@ export default function Page() {
               <p style={{ margin: 0, color: "#4b5563", lineHeight: 1.5 }}>
                 {v.description}
               </p>
+              <button
+  onClick={() => deleteVendor(v.id)}
+  style={{
+    marginTop: 12,
+    width: "100%",
+    padding: 10,
+    background: "#dc2626",
+    color: "#ffffff",
+    borderRadius: 10,
+    border: "none",
+    fontWeight: "bold",
+    cursor: "pointer",
+  }}
+>
+  Delete Vendor
+</button>
             </div>
           ))
         )}
