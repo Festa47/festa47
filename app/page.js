@@ -1,11 +1,5 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { getSupabaseClient } from "../lib/supabase";
-
 export default function Page() {
   const [vendors, setVendors] = useState([]);
-
   const [form, setForm] = useState({
     name: "",
     category: "",
@@ -49,7 +43,7 @@ export default function Page() {
   }
 
   return (
-    <div style={{ padding: 20, maxWidth: 500, margin: "0 auto" }}>
+    <div style={{ padding: 20 }}>
       <h1>Festa Vendors 🎉</h1>
 
       {/* FORM */}
