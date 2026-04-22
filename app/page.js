@@ -9,26 +9,29 @@ export default function Page() {
 
   useEffect(() => {
     async function loadVendors() {
-      const supabase = getSupabaseClient();
+      try {
+        const supabase = getSupabaseClient();
 
-      if (!supabase) {
-        setMessage("Supabase client missing.");
-        console.error("Supabase client missing");
-        return;
+        if (!supabase) {
+          setMessage("Supabase client missing.");
+          return;
+        }
+
+        const { data, error } = await supabase.from("vendors").select("*");
+
+        if (error) {
+          console.error("Supabase error:", error);
+          setMessage(`Supabase error: ${error.message}`);
+          return;
+        }
+
+        console.log("Vendors data:", data);
+        setVendors(data || []);
+        setMessage(data && data.length > 0 ? "" : "No vendors found yet.");
+      } catch (err) {
+        console.error("Unexpected error:", err);
+        setMessage(`Unexpected error: ${err.message}`);
       }
-
-      const { data, error } = await supabase.from("vendors").select("*");
-
-      console.log("DATA:", data);
-      console.log("ERROR:", error);
-
-      if (error) {
-        setMessage(`Supabase error: ${error.message}`);
-        return;
-      }
-
-      setVendors(data || []);
-      setMessage(data && data.length > 0 ? "" : "No vendors found yet.");
     }
 
     loadVendors();
