@@ -6,81 +6,70 @@ import { getSupabaseClient } from "../lib/supabase";
 export default function Page() {
   const [vendors, setVendors] = useState([]);
 
+  const [form, setForm] = useState({
+    name: "",
+    category: "",
+    location: "",
+    price: "",
+    description: "",
+  });
+
   useEffect(() => {
-    async function loadVendors() {
-      const supabase = getSupabaseClient();
-      if (!supabase) return;
-
-      const { data, error } = await supabase.from("vendors").select("*");
-
-      if (!error) {
-        setVendors(data || []);
-      }
-    }
-
     loadVendors();
   }, []);
 
-  return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#fff7fb",
-        padding: 20,
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
-      <div style={{ maxWidth: 420, margin: "0 auto" }}>
-        <h1 style={{ fontSize: 36, marginBottom: 8 }}>Festa Vendors 🎉</h1>
-        <p style={{ color: "#666", marginBottom: 24 }}>
-          Discover vendors for your next event
-        </p>
+  async function loadVendors() {
+    const supabase = getSupabaseClient();
+    if (!supabase) return;
 
-        {vendors.length === 0 ? (
-          <p>No vendors found yet.</p>
-        ) : (
-          vendors.map((v) => (
-            <div
-              key={v.id}
-              style={{
-                background: "#fff",
-                borderRadius: 20,
-                padding: 20,
-                marginBottom: 16,
-                boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
-                border: "1px solid #f3d6e6",
-              }}
-            >
-              <h2 style={{ margin: 0, fontSize: 24 }}>{v.name}</h2>
-              <p style={{ margin: "8px 0", color: "#db2777", fontWeight: "bold" }}>
-                {v.category}
-              </p>
-              <p style={{ margin: "6px 0", color: "#555" }}>📍 {v.location}</p>
-              <p style={{ margin: "6px 0", color: "#111", fontWeight: "bold" }}>
-                ${v.price}
-              </p>
-              <p style={{ marginTop: 10, color: "#444", lineHeight: 1.5 }}>
-                {v.description}
-              </p>
-              <button
-                style={{
-                  marginTop: 14,
-                  background: "#111827",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: 12,
-                  padding: "12px 16px",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                  width: "100%",
-                }}
-              >
-                Request Booking
-              </button>
-            </div>
-          ))
-        )}
+    const { data } = await supabase.from("vendors").select("*");
+    setVendors(data || []);
+  }
+
+  async function addVendor() {
+    const supabase = getSupabaseClient();
+    if (!supabase) return;
+
+    await supabase.from("vendors").insert([
+      {
+        ...form,
+        price: Number(form.price),
+      },
+    ]);
+
+    setForm({
+      name: "",
+      category: "",
+      location: "",
+      price: "",
+      description: "",
+    });
+
+    loadVendors();
+  }
+
+  return (
+    <div style={{ padding: 20, maxWidth: 500, margin: "0 auto" }}>
+      <h1>Festa Vendors 🎉</h1>
+
+      {/* FORM */}
+      <div style={{ marginBottom: 30 }}>
+        <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+        <input placeholder="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+        <input placeholder="Location" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
+        <input placeholder="Price" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
+        <input placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+
+        <button onClick={addVendor}>Add Vendor</button>
       </div>
+
+      {/* LIST */}
+      {vendors.map((v) => (
+        <div key={v.id} style={{ marginBottom: 12 }}>
+          <h2>{v.name}</h2>
+          <p>{v.category}</p>
+        </div>
+      ))}
     </div>
   );
 }
