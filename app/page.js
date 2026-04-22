@@ -4,36 +4,42 @@ import { useEffect, useState } from "react";
 import { getSupabaseClient } from "../lib/supabase";
 
 export default function Page() {
-  const [message, setMessage] = useState("Loading vendors...");
+  const [vendors, setVendors] = useState([]);
 
   useEffect(() => {
-    async function run() {
-      try {
-        const supabase = getSupabaseClient();
-        if (!supabase) {
-          setMessage("Supabase client missing");
-          return;
-        }
+    async function loadVendors() {
+      const supabase = getSupabaseClient();
+      if (!supabase) return;
 
-        const { data, error } = await supabase.from("vendors").select("*");
-        if (error) {
-          setMessage(`Supabase error: ${error.message}`);
-          return;
-        }
+      const { data, error } = await supabase
+        .from("vendors")
+        .select("*");
 
-        setMessage(`Loaded ${data?.length || 0} vendors`);
-      } catch (err) {
-        setMessage(`Unexpected error: ${err.message}`);
+      if (!error) {
+        setVendors(data || []);
       }
     }
 
-    run();
+    loadVendors();
   }, []);
 
   return (
     <div style={{ padding: 20 }}>
       <h1>Festa Vendors 🎉</h1>
-      <p>{message}</p>
+
+      {vendors.length === 0 ? (
+        <p>No vendors found yet.</p>
+      ) : (
+        vendors.map((v) => (
+          <div key={v.id} style={{ marginBottom: 12 }}>
+            <h2>{v.name}</h2>
+            <p>{v.category}</p>
+            <p>{v.location}</p>
+            <p>${v.price}</p>
+            <p>{v.description}</p>
+          </div>
+        ))
+      )}
     </div>
   );
 }
