@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getSupabaseClient } from "../lib/supabase";
 
 export default function Page() {
   const [vendors, setVendors] = useState([]);
+  const [search, setSearch] = useState("");
   const [form, setForm] = useState({
     name: "",
     category: "",
@@ -51,6 +52,25 @@ export default function Page() {
     }
   }
 
+  const filteredVendors = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return vendors;
+
+    return vendors.filter((v) => {
+      const name = String(v.name || "").toLowerCase();
+      const category = String(v.category || "").toLowerCase();
+      const location = String(v.location || "").toLowerCase();
+      const description = String(v.description || "").toLowerCase();
+
+      return (
+        name.includes(q) ||
+        category.includes(q) ||
+        location.includes(q) ||
+        description.includes(q)
+      );
+    });
+  }, [vendors, search]);
+
   return (
     <div
       style={{
@@ -67,6 +87,23 @@ export default function Page() {
         <p style={{ color: "#6b7280", marginBottom: 24 }}>
           Discover vendors for your next event
         </p>
+
+        <div
+          style={{
+            background: "#ffffff",
+            padding: 16,
+            borderRadius: 16,
+            boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
+            marginBottom: 16,
+          }}
+        >
+          <input
+            placeholder="Search vendors, category, location..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={inputStyle}
+          />
+        </div>
 
         <div
           style={{
@@ -115,10 +152,10 @@ export default function Page() {
           </button>
         </div>
 
-        {vendors.length === 0 ? (
-          <p>No vendors found yet.</p>
+        {filteredVendors.length === 0 ? (
+          <p>No matching vendors found.</p>
         ) : (
-          vendors.map((v) => (
+          filteredVendors.map((v) => (
             <div
               key={v.id}
               style={{
