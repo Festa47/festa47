@@ -53,20 +53,12 @@ export default function Page() {
     }
   }
 
-  const filteredVendors = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return vendors;
+  const categories = [
+    "All",
+    ...Array.from(new Set(vendors.map((v) => v.category))),
+  ];
 
-    return vendors.filter((v) => {
-      const name = String(v.name || "").toLowerCase();
-      const category = String(v.category || "").toLowerCase();
-      const location = String(v.location || "").toLowerCase();
-      const description = String(v.description || "").toLowerCase();
-const categories = [
-  "All",
-  ...Array.from(new Set(vendors.map((v) => v.category))),
-];
-      return (
+  return (
         name.includes(q) ||
         category.includes(q) ||
         location.includes(q) ||
