@@ -69,7 +69,7 @@ export default function Page() {
 return (
   <div style={{ padding: 20, maxWidth: 500, margin: "0 auto" }}>
     <h1 style={{ fontSize: 32 }}>Festa Vendors 🎉</h1>
-
+<p>{vendors.length} vendors loaded</p>
     {/* SEARCH */}
     <input
       placeholder="Search vendors..."
