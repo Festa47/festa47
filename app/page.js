@@ -131,7 +131,7 @@ return (
 
     {/* LIST */}
     <div style={{ marginTop: 24 }}>
-      {filtered.map((v) => (
+      {vendors.map((v) => (
         <div
           key={v.id}
           style={{
