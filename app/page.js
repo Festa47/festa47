@@ -15,6 +15,14 @@ export default function Page() {
     description: "",
   });
 
+  const [selectedVendor, setSelectedVendor] = useState(null);
+  const [bookingForm, setBookingForm] = useState({
+    customer_name: "",
+    customer_email: "",
+    event_date: "",
+    notes: "",
+  });
+
   useEffect(() => {
     loadVendors();
   }, []);
@@ -50,7 +58,45 @@ export default function Page() {
         description: "",
       });
       loadVendors();
-       alert("Vendor added!");
+      alert("Vendor added!");
+    }
+  }
+
+  async function deleteVendor(id) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return;
+
+    const { error } = await supabase.from("vendors").delete().eq("id", id);
+
+    if (!error) {
+      loadVendors();
+      alert("Vendor deleted!");
+    }
+  }
+
+  async function requestBooking() {
+    const supabase = getSupabaseClient();
+    if (!supabase || !selectedVendor) return;
+
+    const { error } = await supabase.from("bookings").insert([
+      {
+        vendor_name: selectedVendor.name,
+        customer_name: bookingForm.customer_name,
+        customer_email: bookingForm.customer_email,
+        event_date: bookingForm.event_date,
+        notes: bookingForm.notes,
+      },
+    ]);
+
+    if (!error) {
+      alert("Booking request sent!");
+      setBookingForm({
+        customer_name: "",
+        customer_email: "",
+        event_date: "",
+        notes: "",
+      });
+      setSelectedVendor(null);
     }
   }
 
@@ -75,204 +121,136 @@ export default function Page() {
   });
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#fff7fb",
-        padding: 20,
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
-      <div style={{ maxWidth: 420, margin: "0 auto" }}>
-        <h1 style={{ fontSize: 36, marginBottom: 8, color: "#111827" }}>
-          Festa Vendors 🎉
-        </h1>
-        <p style={{ color: "#6b7280", marginBottom: 24 }}>
-          Discover vendors for your next event
-        </p>
+    <div style={{ padding: 20 }}>
+      <h1>Festa Vendors 🎉</h1>
 
-        <div
-          style={{
-            background: "#ffffff",
-            padding: 16,
-            borderRadius: 16,
-            boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
-            marginBottom: 16,
-          }}
-        >
-          <input
-            placeholder="Search vendors, category, location..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={inputStyle}
-          />
-        </div>
+      {/* SEARCH */}
+      <input
+        placeholder="Search vendors..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
 
-        <div
-          style={{
-            display: "flex",
-            gap: 8,
-            overflowX: "auto",
-            marginBottom: 16,
-            paddingBottom: 4,
-          }}
-        >
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              style={{
-                whiteSpace: "nowrap",
-                padding: "10px 14px",
-                borderRadius: 999,
-                border:
-                  selectedCategory === category
-                    ? "none"
-                    : "1px solid #e5e7eb",
-                background:
-                  selectedCategory === category ? "#111827" : "#ffffff",
-                color:
-                  selectedCategory === category ? "#ffffff" : "#374151",
-                fontWeight: "bold",
-                cursor: "pointer",
-              }}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-
-        <div
-          style={{
-            background: "#ffffff",
-            padding: 16,
-            borderRadius: 16,
-            boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
-            marginBottom: 24,
-            display: "grid",
-            gap: 10,
-          }}
-        >
-          <input
-            placeholder="Name"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            style={inputStyle}
-          />
-          <input
-            placeholder="Category"
-            value={form.category}
-            onChange={(e) => setForm({ ...form, category: e.target.value })}
-            style={inputStyle}
-          />
-          <input
-            placeholder="Location"
-            value={form.location}
-            onChange={(e) => setForm({ ...form, location: e.target.value })}
-            style={inputStyle}
-          />
-          <input
-            placeholder="Price"
-            value={form.price}
-            onChange={(e) => setForm({ ...form, price: e.target.value })}
-            style={inputStyle}
-          />
-          <input
-            placeholder="Description"
-            value={form.description}
-            onChange={(e) =>
-              setForm({ ...form, description: e.target.value })
-            }
-            style={inputStyle}
-          />
-
-          <button onClick={addVendor} style={buttonStyle}>
-            Add Vendor
+      {/* CATEGORY FILTER */}
+      <div style={{ marginTop: 10 }}>
+        {categories.map((c) => (
+          <button key={c} onClick={() => setSelectedCategory(c)}>
+            {c}
           </button>
-        </div>
+        ))}
+      </div>
 
-        {filteredVendors.length === 0 ? (
-          <p>No matching vendors found.</p>
-        ) : (
-          filteredVendors.map((v) => (
-            <div
-              key={v.id}
-              style={{
-                background: "#ffffff",
-                borderRadius: 16,
-                padding: 16,
-                marginBottom: 16,
-                boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
-                border: "1px solid #f3d6e6",
+      {/* ADD VENDOR */}
+      <div style={{ marginTop: 20 }}>
+        <input
+          placeholder="Name"
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+        />
+        <input
+          placeholder="Category"
+          value={form.category}
+          onChange={(e) => setForm({ ...form, category: e.target.value })}
+        />
+        <input
+          placeholder="Location"
+          value={form.location}
+          onChange={(e) => setForm({ ...form, location: e.target.value })}
+        />
+        <input
+          placeholder="Price"
+          value={form.price}
+          onChange={(e) => setForm({ ...form, price: e.target.value })}
+        />
+        <input
+          placeholder="Description"
+          value={form.description}
+          onChange={(e) =>
+            setForm({ ...form, description: e.target.value })
+          }
+        />
+
+        <button onClick={addVendor}>Add Vendor</button>
+      </div>
+
+      {/* VENDORS LIST */}
+      <div style={{ marginTop: 20 }}>
+        {filteredVendors.map((v) => (
+          <div key={v.id} style={{ border: "1px solid #ccc", padding: 10 }}>
+            <h3>{v.name}</h3>
+            <p>{v.category}</p>
+            <p>{v.location}</p>
+            <p>${v.price}</p>
+            <p>{v.description}</p>
+
+            <button
+              onClick={() => {
+                if (
+                  confirm("Are you sure you want to delete this vendor?")
+                ) {
+                  deleteVendor(v.id);
+                }
               }}
             >
-              <h2 style={{ margin: "0 0 8px", color: "#111827" }}>
-                {v.name}
-              </h2>
-              <p
-                style={{
-                  margin: "0 0 8px",
-                  color: "#db2777",
-                  fontWeight: "bold",
-                }}
-              >
-                {v.category}
-              </p>
-              <p style={{ margin: "0 0 8px", color: "#4b5563" }}>
-                📍 {v.location}
-              </p>
-              <p
-                style={{
-                  margin: "0 0 8px",
-                  color: "#111827",
-                  fontWeight: "bold",
-                }}
-              >
-                ${v.price}
-              </p>
-              <p style={{ margin: 0, color: "#4b5563", lineHeight: 1.5 }}>
-                {v.description}
-              </p>
-              <button
-  onClick={() => deleteVendor(v.id)}
-  style={{
-    marginTop: 12,
-    width: "100%",
-    padding: 10,
-    background: "#dc2626",
-    color: "#ffffff",
-    borderRadius: 10,
-    border: "none",
-    fontWeight: "bold",
-    cursor: "pointer",
-  }}
->
-  Delete Vendor
-</button>
-            </div>
-          ))
-        )}
+              Delete
+            </button>
+
+            <button onClick={() => setSelectedVendor(v)}>
+              Request Booking
+            </button>
+          </div>
+        ))}
       </div>
+
+      {/* BOOKING FORM */}
+      {selectedVendor && (
+        <div style={{ marginTop: 20, border: "1px solid black", padding: 10 }}>
+          <h2>Book {selectedVendor.name}</h2>
+
+          <input
+            placeholder="Your Name"
+            value={bookingForm.customer_name}
+            onChange={(e) =>
+              setBookingForm({
+                ...bookingForm,
+                customer_name: e.target.value,
+              })
+            }
+          />
+          <input
+            placeholder="Your Email"
+            value={bookingForm.customer_email}
+            onChange={(e) =>
+              setBookingForm({
+                ...bookingForm,
+                customer_email: e.target.value,
+              })
+            }
+          />
+          <input
+            placeholder="Event Date"
+            value={bookingForm.event_date}
+            onChange={(e) =>
+              setBookingForm({
+                ...bookingForm,
+                event_date: e.target.value,
+              })
+            }
+          />
+          <input
+            placeholder="Notes"
+            value={bookingForm.notes}
+            onChange={(e) =>
+              setBookingForm({
+                ...bookingForm,
+                notes: e.target.value,
+              })
+            }
+          />
+
+          <button onClick={requestBooking}>Submit Booking</button>
+        </div>
+      )}
     </div>
   );
 }
-
-const inputStyle = {
-  width: "100%",
-  padding: "10px 12px",
-  borderRadius: 10,
-  border: "1px solid #d1d5db",
-  fontSize: 14,
-  boxSizing: "border-box",
-};
-
-const buttonStyle = {
-  width: "100%",
-  padding: 12,
-  background: "#111827",
-  color: "#ffffff",
-  borderRadius: 12,
-  border: "none",
-  fontWeight: "bold",
-  cursor: "pointer",
-};
