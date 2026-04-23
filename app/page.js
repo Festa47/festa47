@@ -20,9 +20,18 @@ export default function Page() {
 
   async function loadVendors() {
     const supabase = getSupabaseClient();
-    if (!supabase) return;
+
+    if (!supabase) {
+      console.log("NO SUPABASE CLIENT");
+      return;
+    }
+
+    console.log("SUPABASE CLIENT EXISTS");
 
     const { data, error } = await supabase.from("vendors").select("*");
+
+    console.log("DATA:", data);
+    console.log("ERROR:", error);
 
     if (error) {
       console.error(error);
