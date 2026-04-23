@@ -66,7 +66,7 @@ export default function Page() {
       .includes(search.toLowerCase())
   );
 
- return (
+return (
   <div style={{ padding: 20, maxWidth: 500, margin: "0 auto" }}>
     <h1 style={{ fontSize: 32 }}>Festa Vendors 🎉</h1>
 
@@ -170,3 +170,4 @@ export default function Page() {
     </div>
   </div>
 );
+}
